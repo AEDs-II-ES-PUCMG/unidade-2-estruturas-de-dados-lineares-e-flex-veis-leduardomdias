@@ -204,18 +204,73 @@ public class App {
         return pedido;
     }
     
+    /** Pilha de produtos mais recentemente pedidos (um produto por entrada, sem duplicatas por pedido) */
+    static Pilha<Produto> pilhaProdutosRecentes = new Pilha<>();
+
     /**
-     * Finaliza um pedido, momento no qual ele deve ser armazenado em uma pilha de pedidos.
+     * Finaliza um pedido: exibe o resumo, empilha seus produtos na pilha de recentes
+     * e armazena o pedido na pilha de pedidos.
      * @param pedido O pedido que deve ser finalizado.
      */
     public static void finalizarPedido(Pedido pedido) {
-    	
-    	// TODO
+
+        if (pedido == null) {
+            System.out.println("Nenhum pedido em aberto para finalizar.");
+            return;
+        }
+
+        cabecalho();
+        System.out.println("Finalizando pedido...");
+        System.out.println(pedido);
+
+        ItemDePedido[] itens = pedido.getItensDoPedido();
+        for (ItemDePedido item : itens) {
+            if (item == null) break;
+            pilhaProdutosRecentes.empilhar(item.getProduto());
+        }
+
+        pilhaPedidos.empilhar(pedido);
+        System.out.println("\nPedido finalizado e registrado com sucesso!");
     }
-    
+
+    /**
+     * Lista os produtos dos K pedidos mais recentes usando subPilha.
+     * Solicita ao usuário quantos pedidos recentes deseja visualizar.
+     */
     public static void listarProdutosPedidosRecentes() {
-    	
-    	// TODO
+
+        cabecalho();
+
+        if (pilhaProdutosRecentes.vazia()) {
+            System.out.println("Nenhum produto pedido até o momento.");
+            return;
+        }
+
+        Integer k = lerOpcao("Quantos produtos recentes deseja visualizar?", Integer.class);
+        if (k == null || k <= 0) {
+            System.out.println("Valor inválido.");
+            return;
+        }
+
+        System.out.println("\n--- Produtos mais recentemente pedidos ---");
+        try {
+            Pilha<Produto> recentes = pilhaProdutosRecentes.subPilha(k);
+            while (!recentes.vazia()) {
+                System.out.println(recentes.desempilhar());
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Aviso: " + e.getMessage());
+            System.out.println("Exibindo todos os produtos pedidos:");
+            Pilha<Produto> aux = new Pilha<>();
+            while (!pilhaProdutosRecentes.vazia()) {
+                Produto p = pilhaProdutosRecentes.desempilhar();
+                System.out.println(p);
+                aux.empilhar(p);
+            }
+            while (!aux.vazia()) {
+                pilhaProdutosRecentes.empilhar(aux.desempilhar());
+            }
+        }
     }
     
 	public static void main(String[] args) {

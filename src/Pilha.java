@@ -53,8 +53,29 @@ public class Pilha<E> {
 	 * @throws IllegalArgumentException se a pilha não contém numItens elementos.
 	 */
 	public Pilha<E> subPilha(int numItens) {
-		
-		// TODO
-		return null;
+
+		// Coleta os primeiros numItens elementos do topo em ordem inversa
+		Pilha<E> invertida = new Pilha<>();
+		Celula<E> atual = topo;
+		int count = 0;
+
+		while (atual != fundo && count < numItens) {
+			invertida.empilhar(atual.getItem());
+			atual = atual.getProximo();
+			count++;
+		}
+
+		if (count < numItens) {
+			throw new IllegalArgumentException(
+				"A pilha possui apenas " + count + " elemento(s), mas foram solicitados " + numItens + ".");
+		}
+
+		// Inverte de volta para preservar a ordem original (topo no topo)
+		Pilha<E> resultado = new Pilha<>();
+		while (!invertida.vazia()) {
+			resultado.empilhar(invertida.desempilhar());
+		}
+
+		return resultado;
 	}
 }
