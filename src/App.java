@@ -19,8 +19,8 @@ public class App {
     /** Quantidade de produtos cadastrados atualmente no vetor */
     static int quantosProdutos = 0;
 
-    /** Pilha de pedidos */
-    static Pilha<Pedido> pilhaPedidos = new Pilha<>();
+    /** Fila de pedidos aguardando processamento */
+    static Fila<Pedido> filaPedidos = new Fila<>();
         
     static void limparTela() {
         System.out.print("\033[H\033[2J");
@@ -204,12 +204,8 @@ public class App {
         return pedido;
     }
     
-    /** Pilha de produtos mais recentemente pedidos (um produto por entrada, sem duplicatas por pedido) */
-    static Pilha<Produto> pilhaProdutosRecentes = new Pilha<>();
-
     /**
-     * Finaliza um pedido: exibe o resumo, empilha seus produtos na pilha de recentes
-     * e armazena o pedido na pilha de pedidos.
+     * Finaliza um pedido: exibe o resumo e enfileira o pedido na fila de pedidos.
      * @param pedido O pedido que deve ser finalizado.
      */
     public static void finalizarPedido(Pedido pedido) {
@@ -223,53 +219,36 @@ public class App {
         System.out.println("Finalizando pedido...");
         System.out.println(pedido);
 
-        ItemDePedido[] itens = pedido.getItensDoPedido();
-        for (ItemDePedido item : itens) {
-            if (item == null) break;
-            pilhaProdutosRecentes.empilhar(item.getProduto());
-        }
-
-        pilhaPedidos.empilhar(pedido);
-        System.out.println("\nPedido finalizado e registrado com sucesso!");
+        filaPedidos.enfileirar(pedido);
+        System.out.println("\nPedido finalizado e inserido na fila de processamento!");
     }
 
     /**
-     * Lista os produtos dos K pedidos mais recentes usando subPilha.
-     * Solicita ao usuário quantos pedidos recentes deseja visualizar.
+     * Extrai os K pedidos mais antigos da fila (extrairLote) e lista seus produtos.
+     * Os pedidos extraídos são removidos da fila de origem.
      */
     public static void listarProdutosPedidosRecentes() {
 
         cabecalho();
 
-        if (pilhaProdutosRecentes.vazia()) {
-            System.out.println("Nenhum produto pedido até o momento.");
+        if (filaPedidos.vazia()) {
+            System.out.println("Nenhum pedido na fila até o momento.");
             return;
         }
 
-        Integer k = lerOpcao("Quantos produtos recentes deseja visualizar?", Integer.class);
+        Integer k = lerOpcao("Quantos pedidos recentes deseja visualizar (e remover da fila)?", Integer.class);
         if (k == null || k <= 0) {
             System.out.println("Valor inválido.");
             return;
         }
 
-        System.out.println("\n--- Produtos mais recentemente pedidos ---");
-        try {
-            Pilha<Produto> recentes = pilhaProdutosRecentes.subPilha(k);
-            while (!recentes.vazia()) {
-                System.out.println(recentes.desempilhar());
-            }
-        } catch (IllegalArgumentException e) {
-            System.out.println("Aviso: " + e.getMessage());
-            System.out.println("Exibindo todos os produtos pedidos:");
-            Pilha<Produto> aux = new Pilha<>();
-            while (!pilhaProdutosRecentes.vazia()) {
-                Produto p = pilhaProdutosRecentes.desempilhar();
-                System.out.println(p);
-                aux.empilhar(p);
-            }
-            while (!aux.vazia()) {
-                pilhaProdutosRecentes.empilhar(aux.desempilhar());
-            }
+        Fila<Pedido> lote = filaPedidos.extrairLote(k);
+
+        System.out.println("\n--- Produtos dos pedidos extraídos ---");
+        while (!lote.vazia()) {
+            Pedido p = lote.desenfileirar();
+            System.out.println(p);
+            System.out.println();
         }
     }
     
