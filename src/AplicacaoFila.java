@@ -43,7 +43,7 @@ public class AplicacaoFila {
         char[] alvosTeste = { 'u', 'a', 'e', 'o', ' ', 'z' };
 
         for (char alvo : alvosTeste) {
-            int ocorrencias = fila.contarOcorrencias(alvo);
+            int ocorrencias = fila.cont_ocorrencias(alvo);
             System.out.println("  '" + alvo + "' aparece " + ocorrencias + " vez(es) em \"" + nome + "\"");
         }
     }
